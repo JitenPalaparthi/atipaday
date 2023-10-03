@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/JitenPalaparthi/atipaday/interfaces"
 	"github.com/JitenPalaparthi/atipaday/models"
@@ -33,6 +34,10 @@ func (cp *Tip) Create(ctx context.Context) func(*gin.Context) {
 
 		tip.Tags = tip.ToString() // adding tags
 
+		if tip.Status == "" {
+			tip.Status = "inactive"
+		}
+		tip.LastModified = time.Now().Unix()
 		if con, err := cp.ITip.Create(ctx, tip); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"status": 400, "innerError": err.Error(), "message": "Error in creating contact info"})
 			return

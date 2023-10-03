@@ -5,16 +5,16 @@ import (
 	"fmt"
 
 	"gorm.io/datatypes"
-	"gorm.io/gorm"
 )
 
 type Tip struct {
-	gorm.Model
-	Type    string            `json:"type"`
-	SubType string            `json:"sub_type" gorm:"column:sub_type"`
-	Data    datatypes.JSONMap `json:"data" gorm:"column:data"`
-	Tags    string            `json:"tags"`
-	Status  string            `json:"status"`
+	ID           uint              `json:"id" gorm:"primarykey"`
+	Type         string            `json:"type"`
+	SubType      string            `json:"sub_type" gorm:"column:sub_type"`
+	Data         datatypes.JSONMap `json:"data" gorm:"column:data"`
+	Tags         string            `json:"tags"`
+	Status       string            `json:"status" gorm:"default:active"`
+	LastModified int64             `json:"last_modified" gorm:"column:last_modified"`
 }
 
 func (t *Tip) ToByte() ([]byte, error) {
