@@ -1,8 +1,9 @@
 module github.com/JitenPalaparthi/atipaday
 
-go 1.21.0
+go 1.21.1
 
 require (
+	github.com/JitenPalaparthi/dapr-go-http-wrapper v0.0.0-20231006054521-4116be1c68ed
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang/glog v1.1.2
 	gorm.io/datatypes v1.2.0

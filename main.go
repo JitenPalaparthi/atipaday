@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/JitenPalaparthi/atipaday/apis"
 	"github.com/JitenPalaparthi/atipaday/database"
 	"github.com/JitenPalaparthi/atipaday/handlers"
-
+	"github.com/JitenPalaparthi/dapr-go-http-wrapper/wrapper"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
 )
@@ -25,6 +24,7 @@ var (
 var (
 	DAPR_HOST, DAPR_HTTP_PORT string
 	okHost, okPort            bool
+	daprObj                   *wrapper.Dapr
 )
 
 const (
@@ -38,6 +38,8 @@ func init() {
 	if DAPR_HTTP_PORT, okPort = os.LookupEnv("DAPR_HTTP_PORT"); !okPort {
 		DAPR_HTTP_PORT = "3500"
 	}
+	//daprObj = dapr.New(DAPR_HOST, DAPR_HTTP_PORT)
+	daprObj = wrapper.New(DAPR_HOST, DAPR_HTTP_PORT)
 }
 
 func usage() {
@@ -52,7 +54,6 @@ func init() {
 }
 
 func main() {
-
 	if appPort, okHost = os.LookupEnv("APP_PORT"); !okHost {
 		appPort = "50090"
 	}
@@ -60,8 +61,9 @@ func main() {
 	flag.Set("stderrthreshold", "INFO") // can set up the glog
 	flag.Parse()
 	defer glog.Flush()
-	DSN, err := apis.GetSecret(DAPR_HOST+":"+DAPR_HTTP_PORT+"/v1.0/secrets/"+DAPR_SECRET_STORE, "dsn")
-	glog.Infoln("----->", DSN)
+	DSN, err := daprObj.GetSecretFromFile(DAPR_SECRET_STORE, "dsn")
+	//DSN, err := apis.GetSecret(DAPR_HOST+":"+DAPR_HTTP_PORT+"/v1.0/secrets/"+DAPR_SECRET_STORE, "dsn")
+	//glog.Infoln("dsn info for d", DSN)
 	if err != nil || DSN == "" {
 		glog.Info("Cannot connect to dapr secrets.Taking from local settings.")
 		flag.StringVar(&DSN, "db", "host=127.0.0.1 user=admin password=admin123 dbname=atipadaydb port=55432 sslmode=disable TimeZone=Asia/Shanghai", "--db=host=localhost user=admin password=admin123 dbname=atipadaydb port=55432 sslmode=disable TimeZone=Asia/Shanghai")
@@ -90,6 +92,7 @@ func main() {
 	cdb.DB = db
 	cHandler := new(handlers.Tip)
 	cHandler.ITip = cdb
+	cHandler.Dapr = daprObj
 	v1_tip := r.Group("v1/private/tip")
 	v1_tip.POST("/", cHandler.Create(ctx))
 	v1_tip.GET("/:id", cHandler.GetBy(ctx))

@@ -21,6 +21,14 @@ func (t *Tip) ToByte() ([]byte, error) {
 	return json.Marshal(t)
 }
 
+func (t *Tip) ToBytes() []byte {
+	bytes, err := json.Marshal(t)
+	if err != nil {
+		return nil
+	}
+	return bytes
+}
+
 func (t *Tip) ToJSONString() (string, error) {
 	buf, err := json.Marshal(t)
 	if err != nil {

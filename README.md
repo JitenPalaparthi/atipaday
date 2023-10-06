@@ -1,1 +1,1 @@
- dapr run --app-id atipaday --resources-path=components/ --  go run main.go
+ dapr run --app-id atipaday --app-port 50090 --resources-path=components/ --  go run main.go

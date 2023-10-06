@@ -8,6 +8,8 @@ import (
 
 	"github.com/JitenPalaparthi/atipaday/interfaces"
 	"github.com/JitenPalaparthi/atipaday/models"
+	"github.com/JitenPalaparthi/dapr-go-http-wrapper/wrapper"
+	"github.com/golang/glog"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -15,6 +17,7 @@ import (
 
 type Tip struct {
 	ITip interfaces.ITip
+	Dapr *wrapper.Dapr
 }
 
 func (cp *Tip) Create(ctx context.Context) func(*gin.Context) {
@@ -42,7 +45,10 @@ func (cp *Tip) Create(ctx context.Context) func(*gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"status": 400, "innerError": err.Error(), "message": "Error in creating contact info"})
 			return
 		} else {
-
+			err := cp.Dapr.Publish("tipspubsub", "tips-created", con.ToBytes())
+			if err != nil {
+				glog.Errorln(err)
+			}
 			c.JSON(http.StatusCreated, con)
 			return
 		}
